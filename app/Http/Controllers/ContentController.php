@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Content;
+use DB;
 
 class ContentController extends Controller
 {
@@ -35,6 +36,9 @@ class ContentController extends Controller
        //$content = new Content();
        //idがぞんざいする場合は更新、存在し負ければインスタンス
 
+      DB::beginTransaction();
+      try{
+
    		$content = Content::firstOrNew(['id' => $request->id]);
    		
        // タイトル
@@ -45,6 +49,10 @@ class ContentController extends Controller
        $content->user_id = Auth::user()->id;
        // インスタンスの状態をデータベースに書き込む
        $content->save();
+       DB::commit();
+      } catch (\Exception $e) {
+        DB::rollback();
+      }
 
 
        //「投稿する」をクリックしたら投稿情報表示ページへリダイレクト        
